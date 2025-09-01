@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Blog Nova Postagem</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+
+<body>
+
+<!-- Importa o fragmento do menu -->
+<div th:replace="fragments :: navbar"></div>
+    
+    <h1>Nova Postagem</h1>
+    
+    <form id="postForm" th:action="@{/blog}" th:object="${postDto}" method="post" onsubmit="beforeSubmit()">
+        <div>
+            <label for="title">Título:</label><br>
+            <input id="title" th:field="*{title}" style="width:100%;max-width:800px" maxlength="255" required>
+        </div>
+
+        <!-- campo oculto que recebera o markdown -->
+        <input type="hidden" id="content" th:field="*{content}">
+
+        <!-- editor -->
+        <div id="editor" style="margin-top:12px;border:1px solid #ddd;border-radius:8px;"></div>
+
+        <div style="margin-top:1.5rem;">
+            <button type="submit">publicar</button>
+            <a th:href="@{/blog}" style="margin-left:10px;">Voltar para o blog</a>
+        </div>
+    </form>
+    
+<!-- Importa o rodapé -->
+<div th:replace="fragments :: footer"></div>
+    
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+<script>
+    const token  = document.querySelector('meta[name="_csrf"]')?.content;
+    const header = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+    const editor = new toastui.Editor({
+        el: document.querySelector('#editor'),
+        height: '600px',
+        initialEditType: 'wysiwyg',   // pode trocar para 'markdown'
+        previewStyle: 'vertical',
+        toolbarItems: [
+            ['heading','bold','italic','strike'],
+            ['hr','quote'],
+            ['ul','ol','task','indent','outdent'],
+            ['table','link'],
+            ['image','code','codeblock']
+        ],
+        hooks: {
+            addImageBlobHook: async (blob, callback) => {
+              try {
+                    const fd = new FormData();
+                    fd.append('file', blob);
+                    const res = await fetch('/api/uploads/image', {
+                        method: 'POST',
+                        headers: header && token ? { [header]: token } : {},
+                        body: fd
+                    });
+                    if (!res.ok) throw new Error('Falha no upload');
+                    const data = await res.json(); // {url:"/uploads/blog/xxx.ext"}
+                    callback(data.url, blob.name);
+                  } catch (e) {
+                    alert('Erro ao enviar imagem');
+                    console.error(e);
+                  }
+            }
+        }
+    });
+
+    function beforeSubmit() {
+        // envia o markdown do editor para o hidden input "content"
+        document.getElementById('content').value = editor.getMarkdown();
+    }
+</script>
+
+</body>
+</html>

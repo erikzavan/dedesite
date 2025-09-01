@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Blog</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+
+<!-- Importa o fragmento do menu -->
+<div th:replace="fragments :: navbar"></div>
+
+    <h1>nebula blog</h1>
+    <p>Reflexões e histórias recentes.</p>
+    
+    <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+        <a th:href="@{/blog/new}">Nova Postagem</a>
+    </div>
+    
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+        <div th:if="${currentPage > 0}">
+            <a th:href="@{/blog(page=${currentPage - 1})}">← Página Anterior</a>
+        </div>
+
+        <div th:if="${hasNext}" style="margin-left: 1rem;">
+            <a th:href="@{/blog(page=${currentPage + 1})}">Próxima Página →</a>
+        </div>
+    </div>
+    
+    <div th:if="${posts != null}">
+        <div th:each="post : ${posts}">
+            <article>
+                <p><i th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">Data</i></p>
+                <h2 th:text="${post.title}">Título</h2>
+                <div th:utext="${post.content}">Conteúdo</div>
+                <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                    <form th:action="@{'/blog/delete/' + ${post.id}}" method="post" style="display: inline;">
+                        <button type="submit" onclick="return confirm('Tem certeza que deseja apagar esta postagem?')"> Apagar</button>
+                    </form>
+                </div>
+                <hr/>
+            </article>
+        </div>
+    </div>
+    
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+        <div th:if="${currentPage > 0}">
+            <a th:href="@{/blog(page=${currentPage - 1})}">← Página Anterior</a>
+        </div>
+
+        <div th:if="${hasNext}" style="margin-left: 1rem;">
+            <a th:href="@{/blog(page=${currentPage + 1})}">Próxima Página →</a>
+        </div>
+    </div>
+    
+    <div th:if="${posts == null or #lists.isEmpty(posts)}">
+        <p>Nenhuma postagem por enquanto.</p>
+    </div>
+    
+<!-- Importa o rodapé -->
+<div th:replace="fragments :: footer"></div>
+
+</body>
+</html>

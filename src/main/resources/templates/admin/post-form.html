@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Novo Post</title>
+  <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+  <style>
+    .tui-editor { border: 1px solid #ddd; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Novo Post</h1>
+
+  <form th:action="@{/admin/posts}" method="post" onsubmit="beforeSubmit()" th:object="${post}">
+    <input type="text" th:field="*{title}" placeholder="Título" maxlength="255" required />
+    <!-- texto escondido que receberá o markdown -->
+    <textarea id="contentMd" th:field="*{contentMd}" hidden></textarea>
+
+    <div id="editor"></div>
+
+    <button type="submit">Publicar</button>
+  </form>
+
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+  <script>
+    const token = document.querySelector('meta[name="_csrf"]')?.content;
+    const header = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+    const editor = new toastui.Editor({
+      el: document.querySelector('#editor'),
+      height: '600px',
+      initialEditType: 'wysiwyg', // ou 'markdown'
+      previewStyle: 'vertical',
+      hooks: {
+        // Upload ao colar/arrastar imagem
+        addImageBlobHook: async (blob, callback) => {
+          try {
+            const fd = new FormData();
+            fd.append('file', blob);
+
+            const res = await fetch('/api/uploads/image', {
+              method: 'POST',
+              headers: header && token ? { [header]: token } : {},
+              body: fd
+            });
+            if (!res.ok) throw new Error('Falha no upload');
+            const data = await res.json();
+            callback(data.url, blob.name); // insere a imagem na posição do cursor
+          } catch (e) {
+            alert('Erro ao enviar imagem: ' + e.message);
+          }
+        }
+      },
+      toolbarItems: [
+        // botões comuns
+        ['heading', 'bold', 'italic', 'strike'],
+        ['hr', 'quote'],
+        ['ul', 'ol', 'task'],
+        ['link', 'image', 'code', 'codeblock'],
+        ['table'],
+        ['scrollSync'],
+        ['indent', 'outdent']
+      ]
+    });
+
+    function beforeSubmit() {
+      // garanta que o textarea tenha o markdown atual
+      document.getElementById('contentMd').value = editor.getMarkdown();
+    }
+  </script>
+</body>
+</html>
