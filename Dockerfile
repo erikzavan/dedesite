@@ -5,7 +5,7 @@ COPY . .
 RUN chmod +x mvnw && ./mvnw -DskipTests package
 
 # ---- Run ----
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:24-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 ENV SERVER_PORT=${PORT}
