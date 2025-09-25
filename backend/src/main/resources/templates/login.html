@@ -10,6 +10,7 @@
 
 <!--Thymeleaf -->
 <form th:action="@{/login}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
     <label for="username">Usuário:</label>
     <input type="text" name="username" id="username" required><br/>
 
