@@ -20,16 +20,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth
-                // arquivos públicos (imagens)
-                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
-                // estáticos comuns (se tiver)
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                // upload restrito (mas também há @PreAuthorize no controller)
-                .requestMatchers("/api/uploads/**").hasAnyRole("ADMIN", "AUTHOR")
-                // demais rotas do site (ajuste conforme seu fluxo)
-                .anyRequest().permitAll()
-            )
             .formLogin(form -> form
                 .loginPage("/login")
                 .defaultSuccessUrl("/", true)
@@ -52,11 +42,16 @@ public class SecurityConfig {
               .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             )
             .authorizeHttpRequests(auth -> auth
-              .requestMatchers("/", "/login", "/register", "/css/**", "/images/**", "/js/**", "/uploads/**").permitAll()
-              .anyRequest().authenticated()
-            )
-            .formLogin(Customizer.withDefaults())
-            .logout(Customizer.withDefaults());
+                // arquivos públicos (imagens)
+                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                // páginas públicas
+                .requestMatchers("/", "/blog", "/blog/**", "/login", "/register").permitAll()
+                // estáticos comuns (se tiver)
+                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                // upload restrito (mas também há @PreAuthorize no controller)
+                .requestMatchers("/api/uploads/**").hasAnyRole("ADMIN", "AUTHOR")
+                .anyRequest().authenticated()
+            );
         return http.build();
     }
     
