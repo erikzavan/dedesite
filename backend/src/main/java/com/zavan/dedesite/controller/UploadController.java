@@ -1,5 +1,6 @@
 package com.zavan.dedesite.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,9 @@ import java.util.*;
 @RequestMapping("/api/uploads")
 public class UploadController {
 
+    @Value("${app.upload.dir:/var/www/uploads}")
+    private String uploadDir;
+
     @PostMapping("/image")
     @PreAuthorize("hasRole('ADMIN') or hasRole('AUTHOR')")
     public Map<String, String> upload(@RequestParam("file") MultipartFile file) throws IOException {
@@ -24,7 +28,7 @@ public class UploadController {
           throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Somente imagens");
 
         // cria diretório
-        Path dir = Paths.get("var/www/uploads/blog");
+        Path dir = Paths.get(uploadDir, "blog");
         Files.createDirectories(dir);
 
         // nome seguro
