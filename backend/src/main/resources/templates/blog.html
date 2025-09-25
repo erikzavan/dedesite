@@ -31,7 +31,7 @@
             <article>
                 <p><i th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">Data</i></p>
                 <h2 th:text="${post.title}">Título</h2>
-                <div th:utext="${post.content}">Conteúdo</div>
+                <div th:utext="${post.contentHtml}">Conteúdo</div>
                 <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
                     <form th:action="@{'/blog/delete/' + ${post.id}}" method="post" style="display: inline;">
                         <button type="submit" onclick="return confirm('Tem certeza que deseja apagar esta postagem?')"> Apagar</button>
