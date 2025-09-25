@@ -13,7 +13,7 @@ import org.springframework.data.domain.Sort;
 
 @Service
 public class PostService {
-
+    
     @Autowired
     private PostRepository postRepository;
 
