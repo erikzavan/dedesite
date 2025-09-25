@@ -50,6 +50,10 @@ public class Post {
 
     public void setContent(String content) { this.content_md = content; }
 
+    public String getContentHtml() { return content_html; }
+
+    public void setContentHtml(String contentHtml) { this.content_html = contentHtml; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

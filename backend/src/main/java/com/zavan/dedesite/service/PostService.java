@@ -17,12 +17,17 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private MarkdownService markdownService;
+
     public List<Post> getAllPosts() {
         return postRepository.findAllByOrderByCreatedAtDesc();
     }
     
     public void savePost(Post post) {
-    postRepository.save(post);
+        String safeHtml = markdownService.toSafeHtml(post.getContent());
+        post.setContentHtml(safeHtml);
+        postRepository.save(post);
     }
     
     public Page<Post> getPostsPaginated(int page, int size) {
